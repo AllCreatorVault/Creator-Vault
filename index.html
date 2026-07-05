@@ -1,0 +1,2244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CreatorVault Pro - Creator Revenue Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="4" fill="%23ff6495"/></svg>') 16 16, auto;
+        }
+
+        body.cursor-novice-sword { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M16 4 L14 28 L16 30 L18 28 L16 4" fill="%238B4513" stroke="%23D2691E" stroke-width="1"/></svg>') 16 16, auto; }
+        body.cursor-novice-wand { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M16 4 L14 26 L16 28 L18 26 L16 4" fill="%238B4513" stroke="%23D2691E" stroke-width="1"/><circle cx="16" cy="3" r="3" fill="%23FFD700"/></svg>') 16 16, auto; }
+        body.cursor-warrior-sword { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M16 4 L14 24 L16 30 L18 24 L16 4" fill="%23C0C0C0" stroke="%23696969" stroke-width="2"/><rect x="14" y="22" width="4" height="3" fill="%23A52A2A"/></svg>') 16 16, auto; }
+        body.cursor-warrior-staff { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M16 4 L14 26 L16 30 L18 26 L16 4" fill="%238B4513" stroke="%23654321" stroke-width="2"/><circle cx="16" cy="3" r="4" fill="%239370DB"/></svg>') 16 16, auto; }
+        body.cursor-god-sword { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M16 2 L14 22 L16 30 L18 22 L16 2" fill="%23FFD700" stroke="%23FFA500" stroke-width="2"/><rect x="13" y="20" width="6" height="4" fill="%234B0082"/></svg>') 16 16, auto; }
+        body.cursor-god-ring { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="8" fill="none" stroke="%23FFD700" stroke-width="3"/><circle cx="16" cy="10" r="3" fill="%2300D4FF"/></svg>') 16 16, auto; }
+
+        /* ============================================
+           HEADER
+           ============================================ */
+        .header {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(255, 100, 255, 0.3);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff6495 0%, #00d4ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            background: transparent;
+            color: #e0e0e0;
+            cursor: inherit;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn.active {
+            border-color: #ff6495;
+            background: rgba(255, 100, 149, 0.1);
+        }
+
+        .nav-btn:hover {
+            border-color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        /* ============================================
+           MASCOT
+           ============================================ */
+        .mascot-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 50;
+            display: none;
+        }
+
+        .mascot-container.show {
+            display: block;
+        }
+
+        .mascot {
+            width: 100px;
+            height: 100px;
+            cursor: pointer;
+            position: relative;
+            filter: drop-shadow(0 5px 15px rgba(102, 126, 234, 0.3));
+        }
+
+        /* Nest mode */
+        .mascot.nest-mode {
+            animation: nestBob 2s ease-in-out infinite;
+        }
+
+        .mascot:not(.nest-mode) {
+            animation: float 2s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes nestBob {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .nest {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 100px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .mascot.nest-mode .nest {
+            opacity: 1;
+        }
+
+        .mascot-speech {
+            position: absolute;
+            bottom: 200px;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #ff6495;
+            border-radius: 10px;
+            padding: 15px;
+            color: #fff;
+            font-size: 13px;
+            max-width: 250px;
+            white-space: normal;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .mascot-speech.show {
+            opacity: 1;
+        }
+
+        /* Decorative flowers */
+        /* ============================================
+           CONTAINER
+           ============================================ */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .landing-section {
+            display: block;
+        }
+
+        .landing-section.hidden {
+            display: none;
+        }
+
+        .dashboard-section {
+            display: none;
+        }
+
+        .dashboard-section.active {
+            display: block;
+        }
+
+        /* ============================================
+           HERO SECTION
+           ============================================ */
+        .hero-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .hero-title h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #ff6495 0%, #00d4ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-title p {
+            font-size: 18px;
+            color: rgba(224, 224, 224, 0.7);
+        }
+
+        /* ============================================
+           BUTTONS SECTION
+           ============================================ */
+        .btn-action {
+            background: linear-gradient(135deg, #ff6495 0%, #ff1493 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: inherit;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 100, 149, 0.4);
+        }
+
+        /* ============================================
+           PRICING CARDS
+           ============================================ */
+        .pricing-preview {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .tier-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 100, 255, 0.2);
+            border-radius: 12px;
+            padding: 30px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tier-card:hover {
+            border-color: rgba(0, 212, 255, 0.5);
+            background: rgba(0, 212, 255, 0.05);
+            transform: translateY(-5px);
+        }
+
+        .tier-card.popular {
+            border-color: #ff6495;
+            background: rgba(255, 100, 149, 0.1);
+            transform: scale(1.05);
+        }
+
+        .tier-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ff6495 0%, #ff1493 100%);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: none;
+        }
+
+        .tier-card.popular .tier-badge {
+            display: block;
+        }
+
+        .tier-emoji {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .tier-name {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+
+        .tier-price {
+            font-size: 36px;
+            font-weight: 800;
+            color: #00d4ff;
+            margin-bottom: 5px;
+        }
+
+        .tier-price-sub {
+            font-size: 13px;
+            color: rgba(224, 224, 224, 0.6);
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 100, 255, 0.2);
+            padding-bottom: 20px;
+        }
+
+        .tier-features {
+            list-style: none;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .tier-features li {
+            padding: 8px 0;
+            color: rgba(224, 224, 224, 0.8);
+        }
+
+        .tier-features li.included {
+            color: #00ff00;
+        }
+
+        /* ============================================
+           AUTH SECTION
+           ============================================ */
+        .auth-section {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 100, 255, 0.3);
+            border-radius: 12px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(255, 100, 255, 0.2);
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: transparent;
+            color: rgba(224, 224, 224, 0.6);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: inherit;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .auth-tab.active {
+            color: #ff6495;
+            border-bottom-color: #ff6495;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(255, 100, 255, 0.3);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(224, 224, 224, 0.4);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(255, 100, 255, 0.3);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+            font-size: 14px;
+            min-height: 100px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            resize: vertical;
+        }
+
+        .form-group textarea::placeholder {
+            color: rgba(224, 224, 224, 0.4);
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #ff6495 0%, #ff1493 100%);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: inherit;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 100, 149, 0.4);
+        }
+
+        /* ============================================
+           DASHBOARD TABS
+           ============================================ */
+        .dashboard-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(255, 100, 255, 0.3);
+            overflow-x: auto;
+            padding-bottom: 15px;
+        }
+
+        .dashboard-tab {
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            color: rgba(224, 224, 224, 0.6);
+            cursor: inherit;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .dashboard-tab.active {
+            color: #ff6495;
+            border-bottom-color: #ff6495;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .content-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 100, 255, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .content-card h3 {
+            color: #00d4ff;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .content-card p {
+            color: rgba(224, 224, 224, 0.8);
+            line-height: 1.6;
+        }
+
+        .setup-message {
+            background: rgba(0, 212, 255, 0.1);
+            border-left: 4px solid #00d4ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .setup-message strong {
+            color: #00d4ff;
+        }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 1024px) {
+            .pricing-preview {
+                grid-template-columns: 1fr;
+            }
+
+            .tier-card.popular {
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .hero-title h1 {
+                font-size: 32px;
+            }
+
+            .mascot-container {
+                bottom: 20px;
+                right: 20px;
+            }
+
+            .mascot {
+                width: 70px;
+                height: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <div class="header">
+        <div class="logo">⚔️ CreatorVault Pro</div>
+        <div class="nav-buttons">
+            <button class="nav-btn active" onclick="showLanding()">Home</button>
+            <button class="nav-btn" onclick="showDashboard()">Dashboard</button>
+            <button class="nav-btn" onclick="showSettings()">⚙️ Settings</button>
+        </div>
+    </div>
+
+    <!-- MASCOT -->
+    <div class="mascot-container" id="mascotContainer">
+        <svg class="mascot" id="spriteMascot" onclick="speakMascot()" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <radialGradient id="spriteGradient" cx="35%" cy="35%">
+                    <stop offset="0%" style="stop-color:#FF69B4;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#FF1493;stop-opacity:1" />
+                </radialGradient>
+                <filter id="softGlow">
+                    <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+                    <feMerge>
+                        <feMergeNode in="coloredBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+            </defs>
+
+            <!-- MAIN BODY (Delicate sphere) -->
+            <circle cx="40" cy="40" r="30" fill="url(#spriteGradient)" stroke="#00D4FF" stroke-width="1.5" filter="url(#softGlow)" opacity="0.95" />
+            
+            <!-- INNER GLOW (More delicate) -->
+            <circle cx="40" cy="40" r="28" fill="none" stroke="#00D4FF" stroke-width="0.5" opacity="0.3" />
+            
+            <!-- LEFT EYE (Big and cute) -->
+            <circle cx="28" cy="35" r="6" fill="#FFFFFF" />
+            <circle id="leftEyeIris" cx="28" cy="35" r="3.5" fill="#00D4FF" />
+            <circle id="pupil1" cx="28" cy="35" r="2" fill="#000000" />
+            <circle cx="29" cy="33.5" r="0.8" fill="#FFFFFF" opacity="0.7" />
+            
+            <!-- RIGHT EYE (Big and cute) -->
+            <circle cx="52" cy="35" r="6" fill="#FFFFFF" />
+            <circle id="rightEyeIris" cx="52" cy="35" r="3.5" fill="#00D4FF" />
+            <circle id="pupil2" cx="52" cy="35" r="2" fill="#000000" />
+            <circle cx="53" cy="33.5" r="0.8" fill="#FFFFFF" opacity="0.7" />
+            
+            <!-- TINY NOSE -->
+            <circle cx="40" cy="43" r="1.5" fill="#FFB3D9" />
+            
+            <!-- SMALL SMILE -->
+            <path d="M 36 48 Q 40 50 44 48" fill="none" stroke="#FFB3D9" stroke-width="1" stroke-linecap="round" opacity="0.8" />
+            
+            <!-- SPARKLES (Delicate magic) -->
+            <circle cx="20" cy="25" r="0.8" fill="#00D4FF" opacity="0">
+                <animate attributeName="opacity" values="0;0.6;0" dur="1.5s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="60" cy="25" r="0.8" fill="#FF69B4" opacity="0">
+                <animate attributeName="opacity" values="0;0.6;0" dur="2s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="40" cy="15" r="0.6" fill="#00D4FF" opacity="0">
+                <animate attributeName="opacity" values="0;0.5;0" dur="1.8s" repeatCount="indefinite" />
+            </circle>
+        </svg>
+        <div class="mascot-speech" id="mascotSpeech"></div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="container">
+        <!-- LANDING PAGE -->
+        <div id="landingPage" class="landing-section">
+            <div class="hero-title">
+                <h1>CreatorVault Pro</h1>
+                <p>Track & optimize your revenue across 8 platforms with professional gaming-grade analytics</p>
+            </div>
+
+            <!-- PRICING PREVIEW -->
+            <div class="pricing-preview">
+                <div class="tier-card">
+                    <div class="tier-emoji">🔰</div>
+                    <div class="tier-name">NOVICE</div>
+                    <div class="tier-price">£9.99</div>
+                    <div class="tier-price-sub">/month or £96.91/year (10% off)</div>
+                    <ul class="tier-features">
+                        <li class="included">✅ 1 Platform</li>
+                        <li class="included">✅ Dashboard</li>
+                        <li class="included">✅ Basic Analytics</li>
+                        <li class="included">✅ Help Bot</li>
+                    </ul>
+                </div>
+
+                <div class="tier-card popular">
+                    <div class="tier-badge">Most Popular</div>
+                    <div class="tier-emoji">⚔️</div>
+                    <div class="tier-name">WARRIOR CLASS</div>
+                    <div class="tier-price">£24.99</div>
+                    <div class="tier-price-sub">/month or £242.90/year (10% off)</div>
+                    <ul class="tier-features">
+                        <li class="included">✅ 3 Platforms</li>
+                        <li class="included">✅ Expense Tracking</li>
+                        <li class="included">✅ Tax Planning</li>
+                        <li class="included">✅ Advanced Analytics</li>
+                    </ul>
+                </div>
+
+                <div class="tier-card">
+                    <div class="tier-emoji">👑</div>
+                    <div class="tier-name">ASCENDED GOD</div>
+                    <div class="tier-price">£99.99</div>
+                    <div class="tier-price-sub">/month or £971.91/year (10% off)</div>
+                    <ul class="tier-features">
+                        <li class="included">✅ 8 Platforms</li>
+                        <li class="included">✅ Everything in Warrior +</li>
+                        <li class="included">✅ Bank Integration</li>
+                        <li class="included">✅ AI Strategies</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- AUTH SECTION -->
+            <div class="auth-section">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="switchAuthTab('signin')">SIGN IN / BETA</button>
+                    <button class="auth-tab" onclick="switchAuthTab('signup')">FREE TRIAL</button>
+                </div>
+
+                <!-- SIGN IN FORM -->
+                <form class="auth-form active" id="signinForm">
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="signInEmail" placeholder="your@email.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="signInPassword" placeholder="••••••••">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Or enter Beta Key (2-week access, 1 use)</label>
+                        <input type="text" id="signInBetaKey" placeholder="e.g., BETA-2W-001-CLOUD-STARTER">
+                        <small style="color: rgba(224, 224, 224, 0.5); display: block; margin-top: 5px;">Beta keys expire 14 days after first use</small>
+                    </div>
+
+                    <button type="button" class="btn-submit" onclick="handleSignIn()">SIGN IN</button>
+                </form>
+
+                <!-- SIGN UP FORM -->
+                <form class="auth-form" id="signupForm">
+                    <div class="form-group">
+                        <label>Creator Name</label>
+                        <input type="text" id="signUpName" placeholder="Your name">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="signUpEmail" placeholder="your@email.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="signUpPassword" placeholder="••••••••">
+                    </div>
+
+                    <button type="button" class="btn-submit" onclick="handleSignUp()">SIGN UP FREE</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- DASHBOARD PAGE -->
+        <div id="dashboardPage" class="dashboard-section">
+            <div style="margin-bottom: 30px;">
+                <h1 style="color: #fff; margin-bottom: 10px;">Your CreatorVault Dashboard</h1>
+                <p style="color: rgba(224, 224, 224, 0.7);">Track and manage your creator earnings</p>
+            </div>
+
+            <!-- SETUP MESSAGE -->
+            <div class="setup-message" id="setupMessage">
+                <strong>Welcome to CreatorVault!</strong><br>
+                Your dashboard is currently empty. Connect your platforms to see your earnings:<br><br>
+                <button class="btn-action" style="max-width: 300px;">Connect YouTube</button>
+                <button class="btn-action" style="max-width: 300px; margin-top: 10px;">Connect TikTok</button>
+                <button class="btn-action" style="max-width: 300px; margin-top: 10px;">Connect Spotify</button>
+            </div>
+
+            <!-- DASHBOARD TABS -->
+            <div class="dashboard-tabs">
+                <button class="dashboard-tab active" onclick="switchTab('overview')">📊 Overview</button>
+                <button class="dashboard-tab" onclick="switchTab('platforms')">🎬 Platforms</button>
+                <button class="dashboard-tab" onclick="switchTab('analytics')">📈 Analytics</button>
+                <button class="dashboard-tab" onclick="switchTab('expenses')">💰 Expenses</button>
+                <button class="dashboard-tab" onclick="switchTab('tax-planning')">🧮 Tax Planning</button>
+                <button class="dashboard-tab" onclick="switchTab('announcements')">📢 Announcements</button>
+                <button class="dashboard-tab" onclick="switchTab('coming-soon')">🎁 Coming Soon</button>
+            </div>
+
+            <!-- OVERVIEW TAB -->
+            <div id="overview" class="tab-content active">
+                <div class="content-card">
+                    <h3>📊 Your Revenue Dashboard</h3>
+                    <p style="color: rgba(224, 224, 224, 0.8); margin-bottom: 20px;">Track your earnings across all connected platforms</p>
+                    
+                    <button onclick="loadDemoData()" style="padding: 10px 20px; background: rgba(0, 212, 255, 0.2); border: 1px solid rgba(0, 212, 255, 0.5); border-radius: 6px; color: #00d4ff; cursor: pointer; font-weight: 600; margin-bottom: 20px;">
+                        📊 Load Demo Data (Beta Testing)
+                    </button>
+                    <button onclick="clearEarningsData()" style="padding: 10px 20px; background: rgba(255, 100, 149, 0.2); border: 1px solid rgba(255, 100, 149, 0.3); border-radius: 6px; color: #ff6495; cursor: pointer; font-weight: 600; margin-bottom: 20px; margin-left: 10px;">
+                        🗑️ Clear Data
+                    </button>
+                </div>
+
+                <div class="content-card">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 12px; margin-bottom: 20px;">
+                        <h3 style="margin-top: 0; margin-bottom: 20px;">💰 Total Earnings (This Month)</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                            <div>
+                                <p style="margin: 0; font-size: 12px; opacity: 0.9;">Total Revenue</p>
+                                <p style="margin: 8px 0 0 0; font-size: 32px; font-weight: bold;" id="totalRevenue">£0.00</p>
+                            </div>
+                            <div>
+                                <p style="margin: 0; font-size: 12px; opacity: 0.9;">Platforms Connected</p>
+                                <p style="margin: 8px 0 0 0; font-size: 32px; font-weight: bold;" id="platformCount">0</p>
+                            </div>
+                            <div>
+                                <p style="margin: 0; font-size: 12px; opacity: 0.9;">Estimated Tax (Month)</p>
+                                <p style="margin: 8px 0 0 0; font-size: 32px; font-weight: bold;" id="monthlyTaxEstimate">£0.00</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 15px; font-size: 16px;">🎬 Revenue by Platform</h3>
+                    <div id="platformEarnings" style="display: grid; gap: 12px;">
+                        <!-- Platform earnings will display here -->
+                        <p style="color: rgba(224, 224, 224, 0.6); font-size: 14px;">Click "Load Demo Data" to see earnings by platform</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3 style="margin-bottom: 15px; font-size: 16px;">📈 Monthly Breakdown</h3>
+                    <div id="monthlyEarnings" style="display: grid; gap: 10px;">
+                        <p style="color: rgba(224, 224, 224, 0.6); font-size: 14px;">Load demo data to see monthly earnings trend</p>
+                    </div>
+                </div>
+
+                <div class="content-card" style="border-left: 4px solid rgba(0, 212, 255, 0.5);">
+                    <h3 style="margin-top: 0; margin-bottom: 10px; font-size: 14px;">💡 Next Steps</h3>
+                    <ul style="margin: 0; padding-left: 20px; color: rgba(224, 224, 224, 0.8); font-size: 13px;">
+                        <li style="margin-bottom: 8px;">Use demo data to explore the dashboard</li>
+                        <li style="margin-bottom: 8px;">Go to 🧮 Tax Planning tab to see tax estimates</li>
+                        <li style="margin-bottom: 8px;">Try different countries for tax calculations</li>
+                        <li>Send us feedback on features you'd like!</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- PLATFORMS TAB -->
+            <div id="platforms" class="tab-content">
+                <div class="content-card">
+                    <h3>🎬 Connected Platforms</h3>
+                    <p style="color: rgba(224, 224, 224, 0.8); margin-bottom: 15px;">Connect your platforms to start syncing real earnings data!</p>
+                </div>
+
+                <div class="content-card">
+                    <h3 style="margin-bottom: 15px;">✅ Connected Platforms</h3>
+                    <div id="connectedPlatforms" style="display: grid; gap: 10px;">
+                        <p style="color: rgba(224, 224, 224, 0.6); font-size: 14px;">No platforms connected yet.</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3 style="margin-bottom: 15px;">🔗 Connect a Platform</h3>
+                    <p style="color: rgba(224, 224, 224, 0.7); margin-bottom: 15px; font-size: 13px;">Click any platform below to authorize and sync your earnings:</p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                        <a href="/.netlify/functions/youtube-auth" style="padding: 15px; background: linear-gradient(135deg, rgba(255, 0, 0, 0.2), rgba(255, 100, 100, 0.1)); border: 2px solid rgba(255, 0, 0, 0.3); border-radius: 8px; color: #FF6464; cursor: pointer; font-weight: 600; text-align: center; text-decoration: none; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            🎬 YouTube
+                        </a>
+                        <a href="/.netlify/functions/tiktok-auth" style="padding: 15px; background: linear-gradient(135deg, rgba(0, 0, 0, 0.2), rgba(100, 100, 100, 0.1)); border: 2px solid rgba(0, 0, 0, 0.3); border-radius: 8px; color: #e0e0e0; cursor: pointer; font-weight: 600; text-align: center; text-decoration: none; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            🎵 TikTok
+                        </a>
+                        <a href="/.netlify/functions/twitch-auth" style="padding: 15px; background: linear-gradient(135deg, rgba(145, 70, 255, 0.2), rgba(180, 100, 255, 0.1)); border: 2px solid rgba(145, 70, 255, 0.3); border-radius: 8px; color: #B18FFF; cursor: pointer; font-weight: 600; text-align: center; text-decoration: none; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            🎮 Twitch
+                        </a>
+                        <a href="/.netlify/functions/spotify-auth" style="padding: 15px; background: linear-gradient(135deg, rgba(29, 185, 84, 0.2), rgba(100, 200, 100, 0.1)); border: 2px solid rgba(29, 185, 84, 0.3); border-radius: 8px; color: #1DB954; cursor: pointer; font-weight: 600; text-align: center; text-decoration: none; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            🎧 Spotify
+                        </a>
+                    </div>
+                </div>
+
+                <div class="content-card" style="border-left: 4px solid rgba(0, 212, 255, 0.5);">
+                    <h3 style="margin-top: 0; margin-bottom: 10px; font-size: 14px;">💡 What happens when you connect?</h3>
+                    <ul style="margin: 0; padding-left: 20px; color: rgba(224, 224, 224, 0.8); font-size: 13px;">
+                        <li style="margin-bottom: 8px;">You'll be redirected to the platform's login</li>
+                        <li style="margin-bottom: 8px;">Approve access to your earnings data</li>
+                        <li style="margin-bottom: 8px;">You'll be redirected back to CreatorVault</li>
+                        <li style="margin-bottom: 8px;">Your platform will appear in "Connected Platforms"</li>
+                        <li>You can disconnect anytime!</li>
+                    </ul>
+                </div>
+
+                <div class="content-card" style="border-left: 4px solid rgba(255, 100, 149, 0.5);">
+                    <h3 style="margin-top: 0; margin-bottom: 10px; font-size: 14px;">🔐 Privacy & Security</h3>
+                    <p style="margin: 0; color: rgba(224, 224, 224, 0.8); font-size: 13px;">
+                        CreatorVault only requests read-only access to your earnings data. 
+                        We never store your password. You can revoke access anytime in your platform settings.
+                    </p>
+                </div>
+            </div>
+
+            <!-- ANALYTICS TAB -->
+            <div id="analytics" class="tab-content">
+                <div class="content-card">
+                    <h3>📈 Analytics & Insights</h3>
+                    <p style="color: rgba(224, 224, 224, 0.8); margin-bottom: 20px;">View your earnings trends and platform performance</p>
+                </div>
+
+                <div class="content-card">
+                    <h3 style="margin-bottom: 15px; font-size: 16px;">🏆 Top Performing Platforms</h3>
+                    <div id="analyticsTopPlatforms" style="display: grid; gap: 10px;">
+                        <p style="color: rgba(224, 224, 224, 0.6); font-size: 14px;">Load demo data in Overview tab to see analytics</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3 style="margin-bottom: 15px; font-size: 16px;">📊 Growth Trend (Last 5 Months)</h3>
+                    <div id="analyticsTrend" style="display: grid; gap: 10px;">
+                        <p style="color: rgba(224, 224, 224, 0.6); font-size: 14px;">Demo data will show your monthly growth</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3 style="margin-bottom: 15px; font-size: 16px;">💡 Insights</h3>
+                    <div id="analyticsInsights" style="display: grid; gap: 10px;">
+                        <p style="color: rgba(224, 224, 224, 0.6); font-size: 14px;">Insights will appear once you load demo data</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXPENSES TAB -->
+            <div id="expenses" class="tab-content">
+                <div class="content-card">
+                    <h3>💰 Expenses</h3>
+                    <p>Track your business expenses and optimize your tax filing.</p>
+                </div>
+            </div>
+
+            <!-- UPDATES TAB -->
+            <div id="announcements" class="tab-content">
+                <div class="content-card">
+                    <h3>📢 Announcements & Updates</h3>
+                    <p>See what's new, feature launches, and special announcements!</p>
+                </div>
+
+                <div id="announcementsContainer" style="display: grid; gap: 15px;">
+                    <!-- Announcements will load here -->
+                </div>
+
+                <div class="content-card" style="margin-top: 30px; border: 2px dashed rgba(255, 100, 255, 0.3);">
+                    <h3>✏️ Admin: Add Announcement</h3>
+                    <div class="form-group">
+                        <label>Announcement Title</label>
+                        <input type="text" id="announcementTitle" placeholder="e.g., New Feature Launch">
+                    </div>
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea id="announcementMessage" placeholder="e.g., We've launched tax planning features!" style="width: 100%; padding: 12px; border: 2px solid rgba(255, 100, 255, 0.3); border-radius: 6px; background: rgba(255, 255, 255, 0.05); color: #e0e0e0; font-size: 14px; min-height: 100px; font-family: inherit;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Link (Optional)</label>
+                        <input type="url" id="announcementLink" placeholder="https://example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Link Text (Optional)</label>
+                        <input type="text" id="announcementLinkText" placeholder="e.g., Learn More or View Post">
+                    </div>
+                    <div class="form-group">
+                        <label>Icon/Emoji</label>
+                        <input type="text" id="announcementIcon" placeholder="e.g., 🎁 or 🚀 or 💎" value="📢" maxlength="5">
+                    </div>
+                    <button class="btn-action" onclick="addAnnouncement()" style="margin-top: 15px;">➕ Add Announcement</button>
+                </div>
+            </div>
+
+            <!-- COMING SOON TAB -->
+            <div id="coming-soon" class="tab-content">
+                <div class="content-card">
+                    <h3>🎁 Coming Soon</h3>
+                    <p>Exciting features and collectibles on the horizon!</p>
+                </div>
+
+                <div id="comingSoonContainer" style="display: grid; gap: 15px;">
+                    <!-- Coming soon items will load here -->
+                </div>
+
+                <div class="content-card" style="margin-top: 30px; border: 2px dashed rgba(0, 212, 255, 0.3);">
+                    <h3>✏️ Admin: Add Coming Soon Item</h3>
+                    <div class="form-group">
+                        <label>Item Name</label>
+                        <input type="text" id="comingSoonName" placeholder="e.g., Mascot Plushies">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="comingSoonDescription" placeholder="e.g., Collectible plushies coming Q3 2026!" style="width: 100%; padding: 12px; border: 2px solid rgba(0, 212, 255, 0.3); border-radius: 6px; background: rgba(255, 255, 255, 0.05); color: #e0e0e0; font-size: 14px; min-height: 100px; font-family: inherit;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Expected Release Date (Optional)</label>
+                        <input type="text" id="comingSoonDate" placeholder="e.g., Q3 2026 or July 2026">
+                    </div>
+                    <div class="form-group">
+                        <label>Icon/Emoji</label>
+                        <input type="text" id="comingSoonIcon" placeholder="e.g., 🧸 or ⚔️ or 💎" value="🎁" maxlength="5">
+                    </div>
+                    <button class="btn-action" onclick="addComingSoon()" style="margin-top: 15px;">➕ Add Item</button>
+                </div>
+            </div>
+
+            <!-- TAX PLANNING TAB -->
+            <div id="tax-planning" class="tab-content">
+                <div class="content-card">
+                    <h3>🧮 Tax Planning & Estimates</h3>
+                    <p style="color: rgba(224, 224, 224, 0.8); margin-bottom: 20px;">Plan ahead for taxes with country-specific estimates. Track estimated quarterly payments.</p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label>Select Your Country</label>
+                            <select id="taxCountry" onchange="updateTaxEstimates()" style="width: 100%; padding: 12px; border: 2px solid rgba(0, 212, 255, 0.3); border-radius: 6px; background: rgba(255, 255, 255, 0.05); color: #e0e0e0; font-size: 14px;">
+                                <option value="uk">🇬🇧 United Kingdom</option>
+                                <option value="us">🇺🇸 United States</option>
+                                <option value="ca">🇨🇦 Canada</option>
+                                <option value="au">🇦🇺 Australia</option>
+                                <option value="eu">🇪🇺 EU (General)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Annual Revenue (Estimate)</label>
+                            <input type="number" id="annualRevenue" placeholder="e.g., 50000" value="49200" onchange="updateTaxEstimates()" style="width: 100%; padding: 12px; border: 2px solid rgba(0, 212, 255, 0.3); border-radius: 6px; background: rgba(255, 255, 255, 0.05); color: #e0e0e0; font-size: 14px;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                        <h3 style="margin-top: 0;">📈 Tax Estimate (This Year)</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                            <div>
+                                <p style="margin: 0; font-size: 12px; opacity: 0.9;">Annual Revenue</p>
+                                <p style="margin: 5px 0 0 0; font-size: 22px; font-weight: bold;" id="displayRevenue">£49,200</p>
+                            </div>
+                            <div>
+                                <p style="margin: 0; font-size: 12px; opacity: 0.9;">Estimated Tax</p>
+                                <p style="margin: 5px 0 0 0; font-size: 22px; font-weight: bold;" id="displayTax">£9,840</p>
+                            </div>
+                            <div>
+                                <p style="margin: 0; font-size: 12px; opacity: 0.9;">Monthly Set-Aside</p>
+                                <p style="margin: 5px 0 0 0; font-size: 22px; font-weight: bold;" id="displayMonthly">£820</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 15px; font-size: 14px;">⏰ Quarterly Payment Schedule</h3>
+                    <div style="display: grid; gap: 10px;" id="quarterlySchedule">
+                        <div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; border-left: 4px solid #FFD700; display: grid; grid-template-columns: 1fr auto;">
+                            <div>
+                                <p style="margin: 0; font-weight: 600; font-size: 13px;">Q1 Payment Due (Mar 31)</p>
+                                <p style="margin: 3px 0 0 0; font-size: 12px; color: rgba(224, 224, 224, 0.7);" id="q1days">Next payment in 56 days</p>
+                            </div>
+                            <div style="text-align: right; font-weight: bold; font-size: 16px;" id="q1amount">£2,460</div>
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; border-left: 4px solid #1DB954; display: grid; grid-template-columns: 1fr auto;">
+                            <div>
+                                <p style="margin: 0; font-weight: 600; font-size: 13px;">Q2 Payment Due (Jun 30)</p>
+                                <p style="margin: 3px 0 0 0; font-size: 12px; color: rgba(224, 224, 224, 0.7);" id="q2days">Payment in 147 days</p>
+                            </div>
+                            <div style="text-align: right; font-weight: bold; font-size: 16px;" id="q2amount">£2,460</div>
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; border-left: 4px solid #FF1493; display: grid; grid-template-columns: 1fr auto;">
+                            <div>
+                                <p style="margin: 0; font-weight: 600; font-size: 13px;">Q3 Payment Due (Sep 30)</p>
+                                <p style="margin: 3px 0 0 0; font-size: 12px; color: rgba(224, 224, 224, 0.7);" id="q3days">Payment in 291 days</p>
+                            </div>
+                            <div style="text-align: right; font-weight: bold; font-size: 16px;" id="q3amount">£2,460</div>
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; border-left: 4px solid #00D4FF; display: grid; grid-template-columns: 1fr auto;">
+                            <div>
+                                <p style="margin: 0; font-weight: 600; font-size: 13px;">Q4 Payment Due (Dec 31)</p>
+                                <p style="margin: 3px 0 0 0; font-size: 12px; color: rgba(224, 224, 224, 0.7);" id="q4days">Payment in 366 days</p>
+                            </div>
+                            <div style="text-align: right; font-weight: bold; font-size: 16px;" id="q4amount">£2,460</div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(255, 215, 0, 0.1); padding: 15px; border-radius: 8px; margin-top: 20px; border: 1px solid rgba(255, 215, 0, 0.3);">
+                        <p style="margin: 0; font-size: 12px; color: rgba(255, 215, 0, 0.8);">💡 Pro Tip: Set aside <strong id="tipAmount">£820 per month</strong> to stay on track with quarterly tax payments.</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3 style="margin-bottom: 15px;">📋 Tax Information by Country</h3>
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; border-left: 4px solid #00D4FF;">
+                        <p style="margin: 0 0 10px 0; font-size: 13px; font-weight: 600;" id="countryInfo">
+                            🇬🇧 United Kingdom: Standard tax rate is 20% income tax + National Insurance contributions
+                        </p>
+                        <p style="margin: 0; font-size: 12px; color: rgba(224, 224, 224, 0.7);">These are estimates for planning purposes. Consult with a tax professional for accurate information based on your specific situation.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SETTINGS TAB -->
+            <div id="settings" class="tab-content">
+                <div class="content-card">
+                    <h3>⚙️ Settings</h3>
+                    <label style="display: flex; align-items: center; gap: 10px; color: #fff; cursor: inherit; margin-bottom: 15px;">
+                        <input type="checkbox" id="mascotToggle" checked onchange="toggleMascot(this.checked)">
+                        <span>Show Fantasy Companion</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 10px; color: #fff; cursor: inherit; margin-bottom: 15px;">
+                        <input type="checkbox" id="cursorFollowToggle" checked onchange="toggleWandering(this.checked)">
+                        <span>✨ Companion Wanders Freely (Uncheck for Still Mode)</span>
+                    </label>
+                </div>
+
+                <div class="content-card">
+                    <h3>🎮 Custom Cursor</h3>
+                    <p style="color: rgba(224, 224, 224, 0.7); font-size: 13px; margin-bottom: 15px;">Select your custom cursor theme</p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                        <!-- NOVICE TIER CURSORS -->
+                        <button onclick="setCursor('cursor-novice-sword')" style="padding: 12px; background: rgba(139, 69, 19, 0.3); border: 1px solid rgba(139, 69, 19, 0.6); border-radius: 6px; color: #fff; cursor: pointer; transition: all 0.3s;">
+                            🗡️ Novice Sword
+                        </button>
+                        <button onclick="setCursor('cursor-novice-wand')" style="padding: 12px; background: rgba(255, 215, 0, 0.2); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 6px; color: #fff; cursor: pointer; transition: all 0.3s;">
+                            🪄 Novice Wand
+                        </button>
+
+                        <!-- WARRIOR TIER CURSORS -->
+                        <button onclick="setCursor('cursor-warrior-sword')" style="padding: 12px; background: rgba(192, 192, 192, 0.2); border: 1px solid rgba(192, 192, 192, 0.5); border-radius: 6px; color: #fff; cursor: pointer; transition: all 0.3s;">
+                            ⚔️ Warrior Sword
+                        </button>
+                        <button onclick="setCursor('cursor-warrior-staff')" style="padding: 12px; background: rgba(147, 112, 219, 0.2); border: 1px solid rgba(147, 112, 219, 0.5); border-radius: 6px; color: #fff; cursor: pointer; transition: all 0.3s;">
+                            👊 Warrior Staff
+                        </button>
+
+                        <!-- GOD TIER CURSORS -->
+                        <button onclick="setCursor('cursor-god-sword')" style="padding: 12px; background: rgba(255, 215, 0, 0.3); border: 1px solid rgba(255, 215, 0, 0.6); border-radius: 6px; color: #fff; cursor: pointer; transition: all 0.3s;">
+                            💎 God Sword
+                        </button>
+                        <button onclick="setCursor('cursor-god-ring')" style="padding: 12px; background: rgba(0, 212, 255, 0.2); border: 1px solid rgba(0, 212, 255, 0.5); border-radius: 6px; color: #fff; cursor: pointer; transition: all 0.3s;">
+                            💍 God Ring
+                        </button>
+                    </div>
+
+                    <button onclick="removeCursor()" style="width: 100%; padding: 10px; background: rgba(255, 100, 149, 0.2); border: 1px solid rgba(255, 100, 149, 0.5); border-radius: 6px; color: #fff; cursor: pointer;">
+                        Default Cursor
+                    </button>
+                </div>
+
+                <div class="content-card">
+                    <h3>🌍 Tax & Currency Settings</h3>
+                    <p style="color: rgba(224, 224, 224, 0.7); font-size: 13px; margin-bottom: 15px;">Select your country for accurate tax estimates and currency display</p>
+                    
+                    <div class="form-group">
+                        <label style="color: #fff; margin-bottom: 8px; display: block;">Your Country</label>
+                        <select id="settingsTaxCountry" onchange="updateSettingsTaxCountry()" style="width: 100%; padding: 12px; border: 2px solid rgba(0, 212, 255, 0.3); border-radius: 6px; background: rgba(255, 255, 255, 0.05); color: #e0e0e0; font-size: 14px;">
+                            <option value="uk">🇬🇧 United Kingdom</option>
+                            <option value="us">🇺🇸 United States</option>
+                            <option value="ca">🇨🇦 Canada</option>
+                            <option value="au">🇦🇺 Australia</option>
+                            <option value="eu">🇪🇺 EU (General)</option>
+                        </select>
+                    </div>
+                    
+                    <p style="color: rgba(0, 212, 255, 0.6); font-size: 12px; margin-top: 10px;">💡 Your tax estimates in the Tax Planning tab will update based on this selection.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // MASCOT PHRASES (100+)
+        // ============================================
+        const mascotPhrases = [
+            "Greetings, brave creator! 🎮",
+            "Your power grows stronger each day! ⚔️",
+            "Venture forth and claim your destiny! 👑",
+            "The realm awaits your talents! 🎯",
+            "May your earnings overflow! 💰",
+            "A true champion of the digital realm! 🏆",
+            "Your success echoes across the lands! 🌟",
+            "The algorithm smiles upon you! 😊",
+            "Keep pushing those creative boundaries! 💡",
+            "Your audience adores your content! ❤️",
+            "Let's conquer these revenue mountains! 🏔️",
+            "The treasure chest overflows with riches! 💎",
+            "Your influence spreads far and wide! 🌍",
+            "Legendary performance detected! ✨",
+            "The prophecy foretold your success! 🔮",
+            "Strike while the iron is hot! 🔥",
+            "Your legacy grows with each upload! 📈",
+            "The gaming gods favor you! 🎲",
+            "Channel your inner warrior! ⚔️",
+            "Ascend to godlike status! 👑",
+            "The masses clamor for more! 📣",
+            "Your crown sits perfectly! 👸",
+            "Journey onward to glory! 🛤️",
+            "The ancient scrolls speak of your fame! 📜",
+            "Your stats are absolutely legendary! 📊",
+            "Magic flows through your channels! ✨",
+            "Enchantment and success combined! 🪄",
+            "The crystal ball shows riches! 🔭",
+            "Quest complete: Content mastery! ✅",
+            "Dragons tremble at your power! 🐉",
+            "The realm bows to your talent! 🙇",
+            "A worthy challenger approaches! 🤝",
+            "Your portfolio shines brightly! ✨",
+            "Forge ahead, legendary creator! 🔨",
+            "The spirit of success flows through you! 👻",
+            "Victory tastes sweet, doesn't it? 🏅",
+            "Every view brings fortune! 🍀",
+            "Your creative fire burns eternal! 🔥",
+            "The algorithm recognizes greatness! 🎪",
+            "Step forth, digital overlord! 👾",
+            "Kingdoms rise with your content! 🏰",
+            "The elders celebrate your gains! 🎉",
+            "Your metrics pierce the sky! 🏹",
+            "All hail the revenue king! 👑",
+            "The quest for success continues! 🗺️",
+            "Your power level is over 9000! 💪",
+            "The narrative of your success unfolds! 📖",
+            "Magic and metrics align! 🧲",
+            "Destiny rewards the persistent! 🌠",
+            "A true hero of content creation! 🦸",
+            "The stars align in your favor! ⭐",
+            "Behold the rise of a legend! 🚀",
+            "Your channels echo with glory! 📻",
+            "The vault overflows with your earnings! 🏺",
+            "Platform mastery at its finest! 🎯",
+            "The future belongs to creators like you! 🔮",
+            "Witness the ascension of greatness! 🌌",
+            "Your analytics tell a legendary tale! 📚",
+            "The algorithm blessed your upload! 🙌",
+            "Triumph surrounds your every action! 🎊",
+            "The creator's crown suits you well! 👑",
+            "Your content transcends the ordinary! 🌈",
+            "Embark on greater adventures! 🗻",
+            "The saga of success continues! 📜",
+            "Your influence reaches infinite realms! ♾️",
+            "Champions are forged in dedication! 🛡️",
+            "The golden age of creation is upon you! 🌅",
+            "Your potential knows no bounds! 🌌",
+            "The world watches in amazement! 👀",
+            "Legends are made from passion! 🔥",
+            "Your journey transcends limitations! 🚪",
+            "The prophecy speaks of your brilliance! 📖",
+            "Ascend higher, mighty creator! 🪜",
+            "The fortress of success stands strong! 🏯",
+            "Reality bends to your will! 🌀",
+            "Your legacy inspires millions! 💫",
+            "The eclipse of obscurity has passed! 🌑",
+            "Behold a titan of creation! 🗿",
+            "Your arsenal of talent is impressive! 🎨",
+            "The scales tip toward abundance! ⚖️",
+            "Victory marches ever forward! 🥁",
+            "Your essence radiates success! ☀️",
+            "The vault keeper guards your riches! 💳",
+            "Manifest destiny in content form! 🎬",
+            "The mightiest of creators! 💪",
+            "Your shadow stretches across platforms! 🌑",
+            "Fortune smiles eternally! 😊",
+            "The chronicles record your triumph! 📕",
+            "Ride the wave of success! 🌊",
+            "Your spirit burns with ambition! 🔥",
+            "The heavens celebrate your wins! 🎆",
+            "Infinite possibilities await! 🌠",
+            "The greatest story ever told! 📖",
+            "Your talent eclipses all others! 🌟",
+            "The mountain peak awaits! ⛰️",
+            "Success flows like eternal rivers! 💧",
+            "The realm trembles at your power! ⚡",
+            "Welcome to the champion's circle! 🏆",
+            "Your dreams become reality! 💭",
+            "The treasure map leads to riches! 🗺️"
+        ];
+
+        // ============================================
+        // BETA KEY SYSTEM
+        // ============================================
+        const VALID_BETA_KEYS = [
+            'BETA-2W-001-CLOUD-STARTER', 'BETA-2W-002-SUNNY-BUILDER', 'BETA-2W-003-GOLDEN-MAKER',
+            'BETA-2W-004-STAR-CREATOR', 'BETA-2W-005-FLUFFY-TESTER', 'BETA-2W-006-COZY-ENGINEER',
+            'BETA-2W-007-WISP-DESIGN', 'BETA-2W-008-GLOW-ARTIST', 'BETA-2W-009-ORBY-DEV',
+            'BETA-2W-010-POOF-WRITER', 'BETA-2W-011-SHIMMER-MUSIC', 'BETA-2W-012-SPARK-VIDEO',
+            'BETA-2W-013-NOVA-PODCAST', 'BETA-2W-014-BOUNCE-FITNESS', 'BETA-2W-015-CUDDLE-BEAUTY',
+            'BETA-2W-016-PUFFY-TECH', 'BETA-2W-017-BLISS-SOCIAL', 'BETA-2W-018-AURA-CONTENT',
+            'BETA-2W-019-SNUGGLE-STREAM', 'BETA-2W-020-WHISPER-GROWTH', 'BETA-2W-021-RADIANT-VOICE',
+            'BETA-2W-022-STELLAR-POWER', 'BETA-2W-023-BRILLIANT-DREAM', 'BETA-2W-024-COSMIC-WAVE',
+            'BETA-2W-025-HARMONY-PULSE', 'BETA-2W-026-ENERGY-FLOW', 'BETA-2W-027-CRYSTAL-CLEAR',
+            'BETA-2W-028-VISION-QUEST', 'BETA-2W-029-TRIUMPH-PEAK', 'BETA-2W-030-VICTORY-RUSH'
+        ];
+
+        function validateBetaKey(key) {
+            return VALID_BETA_KEYS.includes(key.toUpperCase().trim());
+        }
+
+        function isBetaKeyExpired(key) {
+            const usedKeys = JSON.parse(localStorage.getItem('usedBetaKeys') || '{}');
+            if (!usedKeys[key]) return false;
+
+            const usedDate = new Date(usedKeys[key]);
+            const expiryDate = new Date(usedDate);
+            expiryDate.setDate(expiryDate.getDate() + 14);
+
+            return new Date() > expiryDate;
+        }
+
+        function isBetaKeyUsed(key) {
+            const usedKeys = JSON.parse(localStorage.getItem('usedBetaKeys') || '{}');
+            return !!usedKeys[key];
+        }
+
+        // ============================================
+        // NEWSLETTER
+        // ============================================
+        // ============================================
+        // MASCOT
+        // ============================================
+        // ============================================
+        // DEMO EARNINGS DATA
+        // ============================================
+        
+        const demoEarningsData = {
+            platforms: {
+                youtube: { name: '🎬 YouTube', earnings: 8500, percentage: 35 },
+                tiktok: { name: '🎵 TikTok', earnings: 6200, percentage: 25 },
+                spotify: { name: '🎧 Spotify', earnings: 4800, percentage: 20 },
+                twitch: { name: '🎮 Twitch', earnings: 3200, percentage: 13 },
+                patreon: { name: '❤️ Patreon', earnings: 1300, percentage: 5 },
+                onlyfans: { name: '👑 OnlyFans', earnings: 400, percentage: 2 }
+            },
+            monthly: {
+                'January': 18200,
+                'February': 19450,
+                'March': 21300,
+                'April': 23800,
+                'May': 25200
+            }
+        };
+
+        function loadDemoData() {
+            // Save demo earnings to localStorage
+            localStorage.setItem('earningsData', JSON.stringify(demoEarningsData));
+            
+            // Calculate totals
+            let totalEarnings = 0;
+            Object.values(demoEarningsData.platforms).forEach(platform => {
+                totalEarnings += platform.earnings;
+            });
+
+            // Update display
+            document.getElementById('totalRevenue').textContent = '£' + totalEarnings.toLocaleString();
+            document.getElementById('platformCount').textContent = Object.keys(demoEarningsData.platforms).length;
+
+            // Calculate estimated monthly tax (28% UK default)
+            const monthlyTax = totalEarnings * 0.28;
+            document.getElementById('monthlyTaxEstimate').textContent = '£' + Math.round(monthlyTax).toLocaleString();
+
+            // Also update annual revenue in tax planning
+            const annualRevenue = totalEarnings * 12; // Estimate annual
+            document.getElementById('annualRevenue').value = Math.round(annualRevenue);
+            updateTaxEstimates();
+
+            // Display platform earnings
+            displayPlatformEarnings();
+            displayMonthlyBreakdown();
+
+            // Show success message
+            alert('✨ Demo data loaded! You can now explore the dashboard.\n\nTotal: £' + totalEarnings.toLocaleString());
+        }
+
+        function displayPlatformEarnings() {
+            const container = document.getElementById('platformEarnings');
+            let html = '';
+
+            Object.entries(demoEarningsData.platforms).forEach(([key, platform]) => {
+                const barWidth = platform.percentage;
+                html += `
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; border-left: 4px solid #00D4FF;">
+                        <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; margin-bottom: 8px;">
+                            <span style="font-weight: 600; font-size: 14px;">${platform.name}</span>
+                            <span style="font-weight: bold; font-size: 16px;">£${platform.earnings.toLocaleString()}</span>
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.1); height: 6px; border-radius: 3px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, #00D4FF, #FF1493); height: 100%; width: ${barWidth}%;"></div>
+                        </div>
+                        <div style="font-size: 11px; color: rgba(224, 224, 224, 0.6); margin-top: 4px;">${platform.percentage}% of total</div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+
+            // Also update Analytics tab
+            displayAnalyticsTopPlatforms();
+            displayAnalyticsTrend();
+            displayAnalyticsInsights();
+        }
+
+        function displayAnalyticsTopPlatforms() {
+            const container = document.getElementById('analyticsTopPlatforms');
+            
+            // Sort platforms by earnings
+            const sorted = Object.entries(demoEarningsData.platforms)
+                .sort((a, b) => b[1].earnings - a[1].earnings)
+                .slice(0, 3);
+
+            let html = '';
+            sorted.forEach(([key, platform], index) => {
+                const medals = ['🥇', '🥈', '🥉'];
+                html += `
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; display: grid; grid-template-columns: 40px 1fr auto; gap: 15px; align-items: center;">
+                        <span style="font-size: 20px;">${medals[index]}</span>
+                        <div>
+                            <p style="margin: 0; font-weight: 600; font-size: 14px;">${platform.name}</p>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: rgba(224, 224, 224, 0.6);">${platform.percentage}% of revenue</p>
+                        </div>
+                        <span style="font-weight: bold; font-size: 16px; white-space: nowrap;">£${platform.earnings.toLocaleString()}</span>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function displayAnalyticsTrend() {
+            const container = document.getElementById('analyticsTrend');
+            let html = '';
+            let maxEarning = Math.max(...Object.values(demoEarningsData.monthly));
+            let prevEarning = null;
+
+            Object.entries(demoEarningsData.monthly).forEach(([month, earnings]) => {
+                const barHeight = (earnings / maxEarning) * 100;
+                let growthPercent = 0;
+                let growthArrow = '→';
+                
+                if (prevEarning) {
+                    growthPercent = Math.round(((earnings - prevEarning) / prevEarning) * 100);
+                    growthArrow = growthPercent > 0 ? '📈' : growthPercent < 0 ? '📉' : '→';
+                }
+                prevEarning = earnings;
+
+                html += `
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; border-left: 4px solid rgba(0, 212, 255, 0.5); display: grid; grid-template-columns: 80px 1fr auto auto;">
+                        <span style="font-size: 13px; color: rgba(224, 224, 224, 0.8);">${month}</span>
+                        <div style="margin: 0 15px;">
+                            <div style="background: rgba(255, 255, 255, 0.1); height: 24px; border-radius: 4px; overflow: hidden;">
+                                <div style="background: linear-gradient(90deg, #667eea, #764ba2); height: 100%; width: ${barHeight}%;"></div>
+                            </div>
+                        </div>
+                        <span style="font-weight: bold; white-space: nowrap;">£${earnings.toLocaleString()}</span>
+                        <span style="text-align: right; white-space: nowrap; ${growthPercent > 0 ? 'color: #00FF88;' : 'color: #FF6B6B;'} font-weight: 600;">${growthArrow} ${growthPercent > 0 ? '+' : ''}${growthPercent}%</span>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function displayAnalyticsInsights() {
+            const container = document.getElementById('analyticsInsights');
+            
+            // Calculate some insights
+            let totalEarnings = 0;
+            Object.values(demoEarningsData.platforms).forEach(p => {
+                totalEarnings += p.earnings;
+            });
+
+            const topPlatform = Object.entries(demoEarningsData.platforms)
+                .sort((a, b) => b[1].earnings - a[1].earnings)[0];
+
+            const monthlyValues = Object.values(demoEarningsData.monthly);
+            const avgMonthly = Math.round(monthlyValues.reduce((a, b) => a + b) / monthlyValues.length);
+            const growth = Math.round(((monthlyValues[monthlyValues.length - 1] - monthlyValues[0]) / monthlyValues[0]) * 100);
+
+            let html = `
+                <div style="background: rgba(0, 212, 255, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #00D4FF;">
+                    <p style="margin: 0 0 8px 0; font-size: 13px; font-weight: 600;">🎯 Key Findings:</p>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: rgba(224, 224, 224, 0.8);">
+                        <li>Your top platform is <strong>${topPlatform[1].name}</strong> generating <strong>£${topPlatform[1].earnings.toLocaleString()}/month</strong></li>
+                        <li>Average monthly earnings: <strong>£${avgMonthly.toLocaleString()}</strong></li>
+                        <li>Growth over last 5 months: <strong style="color: #00FF88;">+${growth}%</strong> 📈</li>
+                        <li>You're on pace to earn <strong>£${(totalEarnings * 12).toLocaleString()}/year</strong></li>
+                    </ul>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function displayMonthlyBreakdown() {
+            const container = document.getElementById('monthlyEarnings');
+            let html = '';
+            let maxEarning = Math.max(...Object.values(demoEarningsData.monthly));
+
+            Object.entries(demoEarningsData.monthly).forEach(([month, earnings]) => {
+                const barHeight = (earnings / maxEarning) * 100;
+                html += `
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; border-left: 4px solid rgba(0, 212, 255, 0.5); display: grid; grid-template-columns: 80px 1fr auto;">
+                        <span style="font-size: 13px; color: rgba(224, 224, 224, 0.8);">${month}</span>
+                        <div style="margin: 0 15px;">
+                            <div style="background: rgba(255, 255, 255, 0.1); height: 24px; border-radius: 4px; overflow: hidden;">
+                                <div style="background: linear-gradient(90deg, #667eea, #764ba2); height: 100%; width: ${barHeight}%;"></div>
+                            </div>
+                        </div>
+                        <span style="font-weight: bold; white-space: nowrap;">£${earnings.toLocaleString()}</span>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function clearEarningsData() {
+            if (confirm('Clear all demo data?')) {
+                localStorage.removeItem('earningsData');
+                document.getElementById('totalRevenue').textContent = '£0.00';
+                document.getElementById('platformCount').textContent = '0';
+                document.getElementById('monthlyTaxEstimate').textContent = '£0.00';
+                document.getElementById('platformEarnings').innerHTML = '<p style="color: rgba(224, 224, 224, 0.6); font-size: 14px;">Click "Load Demo Data" to see earnings by platform</p>';
+                document.getElementById('monthlyEarnings').innerHTML = '<p style="color: rgba(224, 224, 224, 0.6); font-size: 14px;">Load demo data to see monthly earnings trend</p>';
+                document.getElementById('annualRevenue').value = '49200';
+                updateTaxEstimates();
+            }
+        }
+
+        function speakMascot() {
+            const randomPhrase = mascotPhrases[Math.floor(Math.random() * mascotPhrases.length)];
+            const speechBubble = document.getElementById('mascotSpeech');
+            speechBubble.textContent = randomPhrase;
+            speechBubble.classList.add('show');
+
+            setTimeout(() => {
+                speechBubble.classList.remove('show');
+            }, 4000);
+        }
+
+        function toggleMascot(show) {
+            const mascot = document.getElementById('mascotContainer');
+            if (show) {
+                mascot.classList.add('show');
+            } else {
+                mascot.classList.remove('show');
+            }
+            localStorage.setItem('mascotVisible', show);
+        }
+
+        function toggleWandering(isWandering) {
+            const mascot = document.querySelector('.mascot');
+            
+            if (!isWandering) {
+                // Still mode - mascot stays in one place
+                mascot.classList.add('nest-mode');
+            } else {
+                // Wandering mode - mascot moves around
+                mascot.classList.remove('nest-mode');
+            }
+            
+            localStorage.setItem('wanderingEnabled', isWandering);
+        }
+
+        function setCursor(cursorClass) {
+            // Remove all cursor classes
+            document.body.classList.remove(
+                'cursor-novice-sword',
+                'cursor-novice-wand',
+                'cursor-warrior-sword',
+                'cursor-warrior-staff',
+                'cursor-god-sword',
+                'cursor-god-ring'
+            );
+            
+            // Add selected cursor class
+            document.body.classList.add(cursorClass);
+            localStorage.setItem('selectedCursor', cursorClass);
+        }
+
+        function removeCursor() {
+            document.body.classList.remove(
+                'cursor-novice-sword',
+                'cursor-novice-wand',
+                'cursor-warrior-sword',
+                'cursor-warrior-staff',
+                'cursor-god-sword',
+                'cursor-god-ring'
+            );
+            localStorage.removeItem('selectedCursor');
+        }
+
+        // ============================================
+        // TAX PLANNING
+        // ============================================
+        
+        const taxRates = {
+            uk: {
+                name: 'United Kingdom',
+                rate: 0.20,
+                ni: 0.08,
+                total: 0.28,
+                info: '🇬🇧 United Kingdom: 20% income tax + 8% National Insurance ≈ 28% total'
+            },
+            us: {
+                name: 'United States',
+                rate: 0.25,
+                self_employment: 0.15,
+                total: 0.40,
+                info: '🇺🇸 United States: ~25% federal income tax + 15% self-employment tax ≈ 40% total (varies by state)'
+            },
+            ca: {
+                name: 'Canada',
+                rate: 0.22,
+                cpp_ei: 0.10,
+                total: 0.32,
+                info: '🇨🇦 Canada: ~22% income tax + 10% CPP/EI ≈ 32% total'
+            },
+            au: {
+                name: 'Australia',
+                rate: 0.24,
+                medicare: 0.02,
+                total: 0.26,
+                info: '🇦🇺 Australia: ~24% income tax + 2% Medicare levy ≈ 26% total'
+            },
+            eu: {
+                name: 'EU (General)',
+                rate: 0.24,
+                vat: 0.19,
+                total: 0.43,
+                info: '🇪🇺 EU (General): ~24% income tax + 19% VAT ≈ 43% total (varies by country)'
+            }
+        };
+
+        function updateSettingsTaxCountry() {
+            const country = document.getElementById('settingsTaxCountry').value;
+            const taxCountrySelect = document.getElementById('taxCountry');
+            if (taxCountrySelect) {
+                taxCountrySelect.value = country;
+            }
+            updateTaxEstimates();
+            localStorage.setItem('taxCountry', country);
+        }
+
+        function updateTaxEstimates() {
+            const country = document.getElementById('taxCountry').value;
+            const revenue = parseFloat(document.getElementById('annualRevenue').value) || 49200;
+            const taxInfo = taxRates[country];
+            
+            if (!taxInfo) return;
+
+            // Calculate tax
+            const estimatedTax = revenue * taxInfo.total;
+            const monthlySetAside = estimatedTax / 12;
+            const quarterlyPayment = estimatedTax / 4;
+
+            // Update display with currency symbol
+            const symbol = country === 'us' ? '$' : country === 'ca' ? '$' : country === 'au' ? '$' : '£';
+            
+            document.getElementById('displayRevenue').textContent = symbol + revenue.toLocaleString();
+            document.getElementById('displayTax').textContent = symbol + Math.round(estimatedTax).toLocaleString();
+            document.getElementById('displayMonthly').textContent = symbol + Math.round(monthlySetAside).toLocaleString();
+            document.getElementById('tipAmount').textContent = symbol + Math.round(monthlySetAside).toLocaleString() + ' per month';
+            document.getElementById('countryInfo').textContent = taxInfo.info;
+
+            // Update quarterly payments
+            const q1Element = document.getElementById('q1amount');
+            const q2Element = document.getElementById('q2amount');
+            const q3Element = document.getElementById('q3amount');
+            const q4Element = document.getElementById('q4amount');
+
+            q1Element.textContent = symbol + Math.round(quarterlyPayment).toLocaleString();
+            q2Element.textContent = symbol + Math.round(quarterlyPayment).toLocaleString();
+            q3Element.textContent = symbol + Math.round(quarterlyPayment).toLocaleString();
+            q4Element.textContent = symbol + Math.round(quarterlyPayment).toLocaleString();
+
+            // Save preference
+            localStorage.setItem('taxCountry', country);
+            localStorage.setItem('annualRevenue', revenue);
+        }
+
+
+
+        // Free wandering mascot behavior
+        let mascotX = window.innerWidth - 150;
+        let mascotY = window.innerHeight - 150;
+        let mascotVelX = (Math.random() - 0.5) * 2;
+        let mascotVelY = (Math.random() - 0.5) * 2;
+        
+        function wanderMascot() {
+            const mascotContainer = document.getElementById('mascotContainer');
+            if (!mascotContainer) return;
+
+            // Update position
+            mascotX += mascotVelX;
+            mascotY += mascotVelY;
+
+            // Bounce off edges
+            const containerWidth = 100;
+            const containerHeight = 100;
+
+            if (mascotX < 0 || mascotX > window.innerWidth - containerWidth) {
+                mascotVelX *= -1;
+                mascotX = Math.max(0, Math.min(mascotX, window.innerWidth - containerWidth));
+            }
+
+            if (mascotY < 0 || mascotY > window.innerHeight - containerHeight) {
+                mascotVelY *= -1;
+                mascotY = Math.max(0, Math.min(mascotY, window.innerHeight - containerHeight));
+            }
+
+            // Randomly change direction
+            if (Math.random() < 0.01) {
+                mascotVelX = (Math.random() - 0.5) * 3;
+                mascotVelY = (Math.random() - 0.5) * 3;
+            }
+
+            mascotContainer.style.left = mascotX + 'px';
+            mascotContainer.style.top = mascotY + 'px';
+            mascotContainer.style.right = 'auto';
+            mascotContainer.style.bottom = 'auto';
+
+            // Eyes look around
+            const pupil1 = document.getElementById('pupil1');
+            const pupil2 = document.getElementById('pupil2');
+
+            if (pupil1 && pupil2) {
+                // Eyes look in direction of movement
+                const eyeLookX = Math.cos(Math.atan2(mascotVelY, mascotVelX)) * 2;
+                const eyeLookY = Math.sin(Math.atan2(mascotVelY, mascotVelX)) * 2;
+
+                pupil1.setAttribute('cx', 28 + eyeLookX);
+                pupil1.setAttribute('cy', 35 + eyeLookY);
+                pupil2.setAttribute('cx', 52 + eyeLookX);
+                pupil2.setAttribute('cy', 35 + eyeLookY);
+            }
+
+            requestAnimationFrame(wanderMascot);
+        }
+
+        // Start wandering
+        wanderMascot();
+
+        // ============================================
+        // AUTH
+        // ============================================
+        function switchAuthTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tab + 'Form').classList.add('active');
+        }
+
+        function handleSignIn() {
+            const email = document.getElementById('signInEmail').value.trim();
+            const betaKey = document.getElementById('signInBetaKey').value.trim();
+
+            if (betaKey) {
+                if (!validateBetaKey(betaKey)) {
+                    alert('❌ Invalid beta key!');
+                    return;
+                }
+
+                if (isBetaKeyUsed(betaKey)) {
+                    if (isBetaKeyExpired(betaKey)) {
+                        alert('⏰ This beta key has expired (2-week access).');
+                    } else {
+                        alert('⚠️ This beta key has already been used (1-time use only).');
+                    }
+                    return;
+                }
+
+                // Mark key as used
+                const usedKeys = JSON.parse(localStorage.getItem('usedBetaKeys') || '{}');
+                usedKeys[betaKey] = new Date().toISOString();
+                localStorage.setItem('usedBetaKeys', JSON.stringify(usedKeys));
+
+                alert('✅ Beta key validated!\n\n2-week premium access granted!');
+                showDashboard();
+                return;
+            }
+
+            if (!email) {
+                alert('❌ Please enter email or beta key');
+                return;
+            }
+
+            alert('✅ Signed in! (Demo login)');
+            showDashboard();
+        }
+
+        function handleSignUp() {
+            const name = document.getElementById('signUpName').value;
+            const email = document.getElementById('signUpEmail').value;
+            const password = document.getElementById('signUpPassword').value;
+
+            if (!name || !email || !password) {
+                alert('❌ Please fill in all fields');
+                return;
+            }
+
+            alert('✅ Account created!\n\n14-day free trial starts now.\n\nYour dashboard is ready - connect platforms to see your real data!');
+            showDashboard();
+        }
+
+        // ============================================
+        // NAVIGATION
+        // ============================================
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.dashboard-tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getElementById(tabName).classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+
+            // Update subscriber count if switching to settings
+            if (tabName === 'settings') {
+                updateNewsletterCount();
+            }
+        }
+
+        function showLanding() {
+            document.getElementById('landingPage').classList.remove('hidden');
+            document.getElementById('dashboardPage').classList.remove('active');
+            document.getElementById('mascotContainer').classList.remove('show');
+            updateNavButtons('home');
+        }
+
+        function showDashboard() {
+            document.getElementById('landingPage').classList.add('hidden');
+            document.getElementById('dashboardPage').classList.add('active');
+            document.getElementById('mascotContainer').classList.add('show');
+            updateNavButtons('dashboard');
+        }
+
+        function showSettings() {
+            document.getElementById('landingPage').classList.add('hidden');
+            document.getElementById('dashboardPage').classList.add('active');
+            document.getElementById('mascotContainer').classList.add('show');
+            updateNavButtons('settings');
+            // Switch to settings tab after a brief delay to ensure dashboard is visible
+            setTimeout(() => {
+                switchTab('settings');
+            }, 50);
+        }
+
+        function updateNavButtons(active) {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            if (active === 'home') {
+                document.querySelectorAll('.nav-btn')[0].classList.add('active');
+            } else if (active === 'dashboard') {
+                document.querySelectorAll('.nav-btn')[1].classList.add('active');
+            } else if (active === 'settings') {
+                document.querySelectorAll('.nav-btn')[2].classList.add('active');
+            }
+        }
+
+        // ============================================
+        // UPDATES MANAGEMENT
+        // ============================================
+        function addAnnouncement() {
+            const title = document.getElementById('announcementTitle').value.trim();
+            const message = document.getElementById('announcementMessage').value.trim();
+            const link = document.getElementById('announcementLink').value.trim();
+            const linkText = document.getElementById('announcementLinkText').value.trim();
+            const icon = document.getElementById('announcementIcon').value.trim() || '📢';
+
+            if (!title || !message) {
+                alert('❌ Please fill in Title and Message');
+                return;
+            }
+
+            const announcements = JSON.parse(localStorage.getItem('announcements') || '[]');
+
+            announcements.unshift({
+                id: Date.now(),
+                icon: icon,
+                title: title,
+                message: message,
+                link: link,
+                linkText: linkText,
+                date: new Date().toLocaleDateString()
+            });
+
+            localStorage.setItem('announcements', JSON.stringify(announcements));
+
+            // Clear form
+            document.getElementById('announcementTitle').value = '';
+            document.getElementById('announcementMessage').value = '';
+            document.getElementById('announcementLink').value = '';
+            document.getElementById('announcementLinkText').value = '';
+            document.getElementById('announcementIcon').value = '📢';
+
+            displayAnnouncements();
+            alert('✅ Announcement added!');
+        }
+
+        function deleteAnnouncement(id) {
+            if (confirm('Are you sure you want to delete this announcement?')) {
+                const announcements = JSON.parse(localStorage.getItem('announcements') || '[]');
+                const filtered = announcements.filter(a => a.id !== id);
+                localStorage.setItem('announcements', JSON.stringify(filtered));
+                displayAnnouncements();
+            }
+        }
+
+        function displayAnnouncements() {
+            const announcements = JSON.parse(localStorage.getItem('announcements') || '[]');
+            const container = document.getElementById('announcementsContainer');
+
+            if (announcements.length === 0) {
+                container.innerHTML = '<div class="content-card"><p style="text-align: center; color: rgba(224, 224, 224, 0.6);">No announcements yet. Check back soon!</p></div>';
+                return;
+            }
+
+            container.innerHTML = announcements.map(announcement => `
+                <div class="content-card" style="border-left: 4px solid #ff6495;">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div style="flex: 1;">
+                            <h3 style="color: #fff; margin-bottom: 5px;">${announcement.icon} ${announcement.title}</h3>
+                            <small style="color: rgba(224, 224, 224, 0.6);">${announcement.date}</small>
+                            <p style="margin-top: 10px; color: rgba(224, 224, 224, 0.8);">${announcement.message}</p>
+                            ${announcement.link ? `
+                                <a href="${announcement.link}" target="_blank" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: linear-gradient(135deg, #ff6495 0%, #ff1493 100%); color: white; text-decoration: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                                    ${announcement.linkText}
+                                </a>
+                            ` : ''}
+                        </div>
+                        <button onclick="deleteAnnouncement(${announcement.id})" style="background: rgba(255, 100, 149, 0.2); border: 1px solid #ff6495; color: #ff6495; padding: 6px 12px; border-radius: 4px; cursor: inherit; font-size: 12px; font-weight: 600;">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ============================================
+        // COMING SOON
+        // ============================================
+        function addComingSoon() {
+            const name = document.getElementById('comingSoonName').value.trim();
+            const description = document.getElementById('comingSoonDescription').value.trim();
+            const releaseDate = document.getElementById('comingSoonDate').value.trim();
+            const icon = document.getElementById('comingSoonIcon').value.trim() || '🎁';
+
+            if (!name || !description) {
+                alert('❌ Please fill in Name and Description');
+                return;
+            }
+
+            const comingSoon = JSON.parse(localStorage.getItem('comingSoon') || '[]');
+
+            comingSoon.unshift({
+                id: Date.now(),
+                icon: icon,
+                name: name,
+                description: description,
+                releaseDate: releaseDate,
+                addedDate: new Date().toLocaleDateString()
+            });
+
+            localStorage.setItem('comingSoon', JSON.stringify(comingSoon));
+
+            // Clear form
+            document.getElementById('comingSoonName').value = '';
+            document.getElementById('comingSoonDescription').value = '';
+            document.getElementById('comingSoonDate').value = '';
+            document.getElementById('comingSoonIcon').value = '🎁';
+
+            displayComingSoon();
+            alert('✅ Coming Soon item added!');
+        }
+
+        function deleteComingSoon(id) {
+            if (confirm('Are you sure you want to delete this item?')) {
+                const comingSoon = JSON.parse(localStorage.getItem('comingSoon') || '[]');
+                const filtered = comingSoon.filter(c => c.id !== id);
+                localStorage.setItem('comingSoon', JSON.stringify(filtered));
+                displayComingSoon();
+            }
+        }
+
+        function displayComingSoon() {
+            const comingSoon = JSON.parse(localStorage.getItem('comingSoon') || '[]');
+            const container = document.getElementById('comingSoonContainer');
+
+            if (comingSoon.length === 0) {
+                container.innerHTML = '<div class="content-card"><p style="text-align: center; color: rgba(224, 224, 224, 0.6);">Nothing coming soon... yet! 👀</p></div>';
+                return;
+            }
+
+            container.innerHTML = comingSoon.map(item => `
+                <div class="content-card" style="border-left: 4px solid #00d4ff;">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div style="flex: 1;">
+                            <h3 style="color: #fff; margin-bottom: 5px;">${item.icon} ${item.name}</h3>
+                            ${item.releaseDate ? `<small style="color: #00d4ff; font-weight: 600;">📅 Expected: ${item.releaseDate}</small>` : ''}
+                            <p style="margin-top: 10px; color: rgba(224, 224, 224, 0.8);">${item.description}</p>
+                        </div>
+                        <button onclick="deleteComingSoon(${item.id})" style="background: rgba(0, 212, 255, 0.2); border: 1px solid #00d4ff; color: #00d4ff; padding: 6px 12px; border-radius: 4px; cursor: inherit; font-size: 12px; font-weight: 600;">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ============================================
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        // ============================================
+        // OAUTH CALLBACK HANDLING
+        // ============================================
+        
+        function handleOAuthCallback() {
+            // Extract platform data from URL
+            const params = new URLSearchParams(window.location.search);
+            
+            const youtubeData = params.get('youtube_data');
+            const tiktokData = params.get('tiktok_data');
+            const twitchData = params.get('twitch_data');
+            const spotifyData = params.get('spotify_data');
+
+            let connected = false;
+
+            if (youtubeData) {
+                try {
+                    const data = JSON.parse(decodeURIComponent(youtubeData));
+                    localStorage.setItem('youtubeConnected', JSON.stringify(data));
+                    console.log('✅ YouTube connected:', data.channelName);
+                    connected = true;
+                } catch (e) {
+                    console.error('Failed to parse YouTube data:', e);
+                }
+            }
+
+            if (tiktokData) {
+                try {
+                    const data = JSON.parse(decodeURIComponent(tiktokData));
+                    localStorage.setItem('tiktokConnected', JSON.stringify(data));
+                    console.log('✅ TikTok connected');
+                    connected = true;
+                } catch (e) {
+                    console.error('Failed to parse TikTok data:', e);
+                }
+            }
+
+            if (twitchData) {
+                try {
+                    const data = JSON.parse(decodeURIComponent(twitchData));
+                    localStorage.setItem('twitchConnected', JSON.stringify(data));
+                    console.log('✅ Twitch connected:', data.userName);
+                    connected = true;
+                } catch (e) {
+                    console.error('Failed to parse Twitch data:', e);
+                }
+            }
+
+            if (spotifyData) {
+                try {
+                    const data = JSON.parse(decodeURIComponent(spotifyData));
+                    localStorage.setItem('spotifyConnected', JSON.stringify(data));
+                    console.log('✅ Spotify connected:', data.displayName);
+                    connected = true;
+                } catch (e) {
+                    console.error('Failed to parse Spotify data:', e);
+                }
+            }
+
+            // Clean URL if data was found
+            if (connected) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+                displayConnectedPlatforms();
+            }
+        }
+
+        function displayConnectedPlatforms() {
+            const youtube = localStorage.getItem('youtubeConnected');
+            const tiktok = localStorage.getItem('tiktokConnected');
+            const twitch = localStorage.getItem('twitchConnected');
+            const spotify = localStorage.getItem('spotifyConnected');
+
+            let html = '';
+            let connectionCount = 0;
+
+            if (youtube) {
+                try {
+                    const data = JSON.parse(youtube);
+                    html += `
+                        <div style="background: rgba(255, 0, 0, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #FF0000; margin-bottom: 12px;">
+                            <div style="display: grid; grid-template-columns: 1fr auto; align-items: center;">
+                                <div>
+                                    <p style="margin: 0; font-weight: 600;">🎬 YouTube</p>
+                                    <p style="margin: 4px 0 0 0; font-size: 12px; color: rgba(224, 224, 224, 0.7);">${data.channelName}</p>
+                                    <p style="margin: 4px 0 0 0; font-size: 11px; color: rgba(224, 224, 224, 0.5);">${data.subscribers.toLocaleString()} subscribers • ${data.views.toLocaleString()} views</p>
+                                </div>
+                                <button onclick="disconnectPlatform('youtube')" style="padding: 6px 12px; background: rgba(255, 100, 100, 0.2); border: 1px solid rgba(255, 100, 100, 0.5); border-radius: 4px; color: #FF6464; cursor: pointer; font-size: 12px; font-weight: 600;">Disconnect</button>
+                            </div>
+                        </div>
+                    `;
+                    connectionCount++;
+                } catch (e) {
+                    console.error('Error displaying YouTube:', e);
+                }
+            }
+
+            if (tiktok) {
+                try {
+                    const data = JSON.parse(tiktok);
+                    html += `
+                        <div style="background: rgba(0, 0, 0, 0.2); padding: 15px; border-radius: 8px; border-left: 4px solid #000; margin-bottom: 12px;">
+                            <div style="display: grid; grid-template-columns: 1fr auto; align-items: center;">
+                                <div>
+                                    <p style="margin: 0; font-weight: 600;">🎵 TikTok</p>
+                                    <p style="margin: 4px 0 0 0; font-size: 12px; color: rgba(224, 224, 224, 0.7);">Connected</p>
+                                </div>
+                                <button onclick="disconnectPlatform('tiktok')" style="padding: 6px 12px; background: rgba(100, 100, 100, 0.2); border: 1px solid rgba(100, 100, 100, 0.5); border-radius: 4px; color: #aaa; cursor: pointer; font-size: 12px; font-weight: 600;">Disconnect</button>
+                            </div>
+                        </div>
+                    `;
+                    connectionCount++;
+                } catch (e) {
+                    console.error('Error displaying TikTok:', e);
+                }
+            }
+
+            if (twitch) {
+                try {
+                    const data = JSON.parse(twitch);
+                    html += `
+                        <div style="background: rgba(145, 70, 255, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #9146FF; margin-bottom: 12px;">
+                            <div style="display: grid; grid-template-columns: 1fr auto; align-items: center;">
+                                <div>
+                                    <p style="margin: 0; font-weight: 600;">🎮 Twitch</p>
+                                    <p style="margin: 4px 0 0 0; font-size: 12px; color: rgba(224, 224, 224, 0.7);">${data.userName}</p>
+                                </div>
+                                <button onclick="disconnectPlatform('twitch')" style="padding: 6px 12px; background: rgba(145, 100, 255, 0.2); border: 1px solid rgba(145, 70, 255, 0.5); border-radius: 4px; color: #B18FFF; cursor: pointer; font-size: 12px; font-weight: 600;">Disconnect</button>
+                            </div>
+                        </div>
+                    `;
+                    connectionCount++;
+                } catch (e) {
+                    console.error('Error displaying Twitch:', e);
+                }
+            }
+
+            if (spotify) {
+                try {
+                    const data = JSON.parse(spotify);
+                    html += `
+                        <div style="background: rgba(29, 185, 84, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #1DB954; margin-bottom: 12px;">
+                            <div style="display: grid; grid-template-columns: 1fr auto; align-items: center;">
+                                <div>
+                                    <p style="margin: 0; font-weight: 600;">🎧 Spotify</p>
+                                    <p style="margin: 4px 0 0 0; font-size: 12px; color: rgba(224, 224, 224, 0.7);">${data.displayName}</p>
+                                </div>
+                                <button onclick="disconnectPlatform('spotify')" style="padding: 6px 12px; background: rgba(29, 185, 84, 0.2); border: 1px solid rgba(29, 185, 84, 0.5); border-radius: 4px; color: #1DB954; cursor: pointer; font-size: 12px; font-weight: 600;">Disconnect</button>
+                            </div>
+                        </div>
+                    `;
+                    connectionCount++;
+                } catch (e) {
+                    console.error('Error displaying Spotify:', e);
+                }
+            }
+
+            const container = document.getElementById('connectedPlatforms');
+            if (container) {
+                if (connectionCount > 0) {
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<p style="color: rgba(224, 224, 224, 0.6); font-size: 14px;">No platforms connected yet. Click above to connect!</p>';
+                }
+            }
+        }
+
+        function disconnectPlatform(platform) {
+            if (confirm(`Disconnect ${platform.toUpperCase()}?`)) {
+                if (platform === 'youtube') localStorage.removeItem('youtubeConnected');
+                if (platform === 'tiktok') localStorage.removeItem('tiktokConnected');
+                if (platform === 'twitch') localStorage.removeItem('twitchConnected');
+                if (platform === 'spotify') localStorage.removeItem('spotifyConnected');
+                displayConnectedPlatforms();
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Handle OAuth callbacks
+            handleOAuthCallback();
+
+            const mascotVisible = localStorage.getItem('mascotVisible') !== 'false';
+            if (mascotVisible) {
+                document.getElementById('mascotToggle').checked = true;
+            }
+            
+            const wanderingEnabled = localStorage.getItem('wanderingEnabled') !== 'false';
+            document.getElementById('cursorFollowToggle').checked = wanderingEnabled;
+            if (!wanderingEnabled) {
+                document.querySelector('.mascot').classList.add('nest-mode');
+            }
+            
+            // Restore saved cursor
+            const savedCursor = localStorage.getItem('selectedCursor');
+            if (savedCursor) {
+                document.body.classList.add(savedCursor);
+            }
+            
+            displayAnnouncements();
+            displayComingSoon();
+            displayConnectedPlatforms();
+            
+            // Initialize tax planning
+            const savedCountry = localStorage.getItem('taxCountry');
+            if (savedCountry && document.getElementById('taxCountry')) {
+                document.getElementById('taxCountry').value = savedCountry;
+            }
+            if (savedCountry && document.getElementById('settingsTaxCountry')) {
+                document.getElementById('settingsTaxCountry').value = savedCountry;
+            }
+            const savedRevenue = localStorage.getItem('annualRevenue');
+            if (savedRevenue && document.getElementById('annualRevenue')) {
+                document.getElementById('annualRevenue').value = savedRevenue;
+            }
+            if (document.getElementById('taxCountry')) {
+                updateTaxEstimates();
+            }
+
+            // Restore demo earnings data if previously loaded
+            const savedEarnings = localStorage.getItem('earningsData');
+            if (savedEarnings) {
+                try {
+                    // Recalculate totals from demo data
+                    let totalEarnings = 0;
+                    Object.values(demoEarningsData.platforms).forEach(platform => {
+                        totalEarnings += platform.earnings;
+                    });
+
+                    // Update display
+                    document.getElementById('totalRevenue').textContent = '£' + totalEarnings.toLocaleString();
+                    document.getElementById('platformCount').textContent = Object.keys(demoEarningsData.platforms).length;
+                    const monthlyTax = totalEarnings * 0.28;
+                    document.getElementById('monthlyTaxEstimate').textContent = '£' + Math.round(monthlyTax).toLocaleString();
+
+                    // Update annual revenue for tax planning
+                    const annualRevenue = totalEarnings * 12;
+                    if (document.getElementById('annualRevenue')) {
+                        document.getElementById('annualRevenue').value = Math.round(annualRevenue);
+                    }
+
+                    // Display all demo data
+                    displayPlatformEarnings();
+                    displayMonthlyBreakdown();
+                    displayAnalyticsTopPlatforms();
+                    displayAnalyticsTrend();
+                    displayAnalyticsInsights();
+
+                    // Update tax estimates with new revenue
+                    if (document.getElementById('taxCountry')) {
+                        updateTaxEstimates();
+                    }
+                } catch (e) {
+                    console.log('Demo data restore error:', e);
+                }
+            }
+        });
+
+        // Update display when switching to announcements or coming soon tabs
+        const originalSwitchTab = window.switchTab;
+        window.switchTab = function(tabName) {
+            if (originalSwitchTab) {
+                originalSwitchTab.call(this, tabName);
+            }
+            if (tabName === 'announcements') {
+                displayAnnouncements();
+            } else if (tabName === 'coming-soon') {
+                displayComingSoon();
+            }
+        };
+    </script>
+</body>
+</html>
