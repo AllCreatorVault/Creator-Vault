@@ -1976,72 +1976,47 @@
         // ============================================
         
         function handleOAuthCallback() {
-            // Extract platform data from URL
-            const params = new URLSearchParams(window.location.search);
-            
-            const youtubeData = params.get('youtube_data');
-            const tiktokData = params.get('tiktok_data');
-            const twitchData = params.get('twitch_data');
-            const spotifyData = params.get('spotify_data');
+    // Fragment looks like: #spotify_data=...&tiktok_data=...
+    const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash;
+    const params = new URLSearchParams(hash);
 
-            let connected = false;
+    const youtubeData = params.get('youtube_data');
+    const tiktokData = params.get('tiktok_data');
+    const twitchData = params.get('twitch_data');
+    const spotifyData = params.get('spotify_data');
 
-            if (youtubeData) {
-                try {
-                    const data = JSON.parse(decodeURIComponent(youtubeData));
-                    localStorage.setItem('youtubeConnected', JSON.stringify(data));
-                    console.log('✅ YouTube connected:', data.channelName);
-                    connected = true;
-                } catch (e) {
-                    console.error('Failed to parse YouTube data:', e);
-                }
-            }
+    let connected = false;
 
-            if (tiktokData) {
-                try {
-                    const data = JSON.parse(decodeURIComponent(tiktokData));
-                    localStorage.setItem('tiktokConnected', JSON.stringify(data));
-                    console.log('✅ TikTok connected');
-                    connected = true;
-                } catch (e) {
-                    console.error('Failed to parse TikTok data:', e);
-                }
-            }
+    const platforms = [
+        ['youtube', youtubeData, 'youtubeConnected'],
+        ['tiktok', tiktokData, 'tiktokConnected'],
+        ['twitch', twitchData, 'twitchConnected'],
+        ['spotify', spotifyData, 'spotifyConnected']
+    ];
 
-            if (twitchData) {
-                try {
-                    const data = JSON.parse(decodeURIComponent(twitchData));
-                    localStorage.setItem('twitchConnected', JSON.stringify(data));
-                    console.log('✅ Twitch connected:', data.userName);
-                    connected = true;
-                } catch (e) {
-                    console.error('Failed to parse Twitch data:', e);
-                }
-            }
-
-            if (spotifyData) {
-                try {
-                    const data = JSON.parse(decodeURIComponent(spotifyData));
-                    localStorage.setItem('spotifyConnected', JSON.stringify(data));
-                    console.log('✅ Spotify connected:', data.displayName);
-                    connected = true;
-                } catch (e) {
-                    console.error('Failed to parse Spotify data:', e);
-                }
-            }
-
-            // Clean URL if data was found
-            if (connected) {
-                window.history.replaceState({}, document.title, window.location.pathname);
-                displayConnectedPlatforms();
-            }
+    platforms.forEach(([name, raw, storageKey]) => {
+        if (!raw) return;
+        try {
+            const data = JSON.parse(decodeURIComponent(raw));
+            sessionStorage.setItem(storageKey, JSON.stringify(data));
+            console.log(`✅ ${name} connected:`, data.displayName || data.channelName || data.userName || '');
+            connected = true;
+        } catch (e) {
+            console.error(`Failed to parse ${name} data:`, e);
         }
+    });
+
+    if (connected) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+        displayConnectedPlatforms();
+    }
+}
 
         function displayConnectedPlatforms() {
-            const youtube = localStorage.getItem('youtubeConnected');
-            const tiktok = localStorage.getItem('tiktokConnected');
-            const twitch = localStorage.getItem('twitchConnected');
-            const spotify = localStorage.getItem('spotifyConnected');
+            const youtube = sessionStorage.getItem('youtubeConnected');
+            const tiktok = sessionStorage.getItem('tiktokConnected');
+            const twitch = sessionStorage.getItem('twitchConnected');
+            const spotify = sessionStorage.getItem('spotifyConnected');
 
             let html = '';
             let connectionCount = 0;
@@ -2139,10 +2114,10 @@
 
         function disconnectPlatform(platform) {
             if (confirm(`Disconnect ${platform.toUpperCase()}?`)) {
-                if (platform === 'youtube') localStorage.removeItem('youtubeConnected');
-                if (platform === 'tiktok') localStorage.removeItem('tiktokConnected');
-                if (platform === 'twitch') localStorage.removeItem('twitchConnected');
-                if (platform === 'spotify') localStorage.removeItem('spotifyConnected');
+                if (platform === 'youtube') sessionStorage.removeItem('youtubeConnected');
+                if (platform === 'tiktok') sessionStorage.removeItem('tiktokConnected');
+                if (platform === 'twitch') sessionStorage.removeItem('twitchConnected');
+                if (platform === 'spotify') sessionStorage.removeItem('spotifyConnected');
                 displayConnectedPlatforms();
             }
         }
